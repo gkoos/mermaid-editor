@@ -1,7 +1,12 @@
 import mermaid from 'mermaid';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ...existing code...
+  const preview = document.getElementById('preview');
+  const zoomRatio = document.getElementById('zoom-ratio');
+  const errorMessage = document.getElementById('error-message');
+  const editor = document.getElementById('editor');
+  const lineNumbers = document.getElementById('line-numbers');
+
   // Set cursor to magnifying glass (zoom-in) on hover over preview
   if (preview) {
     preview.addEventListener('mouseenter', () => {
@@ -11,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
       preview.style.cursor = '';
     });
   }
-  const zoomRatio = document.getElementById('zoom-ratio');
+
   // Set cursor to pointer on hover and reset zoom on click
   if (zoomRatio) {
     zoomRatio.style.cursor = 'pointer';
@@ -28,8 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
       applyTransform();
     });
   }
+
   let svgRefWidth = 0;
   let svgRefHeight = 0;
+
+  // Zoom and pan state
+  let scale = 1;
+  let panX = 0;
+  let panY = 0;
+  let isDragging = false;
+  let dragStart = {x: 0, y: 0};
 
   function updateZoomRatio() {
     const svgEl = preview.querySelector('svg');
@@ -43,12 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
       zoomRatio.textContent = `Zoom: ${percent}%`;
     }
   }
-  // Zoom and pan state
-  let scale = 1;
-  let panX = 0;
-  let panY = 0;
-  let isDragging = false;
-  let dragStart = {x: 0, y: 0};
 
   // Helper to apply transform to preview
   function applyTransform() {
@@ -56,12 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (svgWrap) {
       svgWrap.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
       svgWrap.style.transformOrigin = 'center center';
-  updateZoomRatio();
+      updateZoomRatio();
     }
   }
-  const errorMessage = document.getElementById('error-message');
-  const editor = document.getElementById('editor');
-  const lineNumbers = document.getElementById('line-numbers');
 
   if (!editor) {
     console.error('Textarea with id="editor" not found!');
@@ -81,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function updateLineNumbers() {
-  const lines = editor.value.replace(/\r/g, '').split('\n');
-  const count = Math.max(lines.length, 1);
-  lineNumbers.innerHTML = Array.from({length: count}, (_, i) => `<div>${i+1}</div>`).join('');
+    const lines = editor.value.replace(/\r/g, '').split('\n');
+    const count = Math.max(lines.length, 1);
+    lineNumbers.innerHTML = Array.from({length: count}, (_, i) => `<div>${i+1}</div>`).join('');
   }
 
   function renderMermaid(code = '') {
@@ -95,13 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
       preview.innerHTML = '';
     }
     if (!errorMsg) {
-  preview.innerHTML = `<div class="svg-wrap"><div class="mermaid">${code}</div></div>`;
-  preview.style.display = 'inline-block';
-  preview.style.width = '';
-  preview.style.height = '';
-  preview.style.overflow = 'visible';
-  preview.style.padding = '';
-  preview.style.boxSizing = 'border-box';
+      preview.innerHTML = `<div class="svg-wrap"><div class="mermaid">${code}</div></div>`;
+      // Force preview container to maintain fixed dimensions using flexbox
+      preview.style.overflow = 'hidden';
+      preview.style.display = 'flex';
+      preview.style.alignItems = 'center';
+      preview.style.justifyContent = 'center';
       try {
         const result = mermaid.init(undefined, preview.querySelector('.mermaid'));
         if (result && typeof result.then === 'function') {
@@ -119,58 +122,58 @@ document.addEventListener('DOMContentLoaded', () => {
       panX = 0;
       panY = 0;
       requestAnimationFrame(() => {
-      const svgWrap = preview.querySelector('.svg-wrap');
-      const svgEl = preview.querySelector('svg');
-      if (svgEl) {
-        // Remove all scaling attributes/styles Mermaid injects
-        svgEl.removeAttribute('width');
-        svgEl.removeAttribute('height');
-        svgEl.removeAttribute('style');
-        const viewBox = svgEl.viewBox?.baseVal;
-        if (viewBox) {
-          svgRefWidth = viewBox.width;
-          svgRefHeight = viewBox.height;
-        }
-      }
-      if (svgWrap) {
-        svgWrap.style.width = '100%';
-        svgWrap.style.height = '100%';
-        svgWrap.style.maxWidth = '';
-        svgWrap.style.maxHeight = '';
-        svgWrap.style.display = '';
-        svgWrap.style.overflow = '';
+        const svgWrap = preview.querySelector('.svg-wrap');
+        const svgEl = preview.querySelector('svg');
         if (svgEl) {
-          svgEl.setAttribute('width', '100%');
-          svgEl.setAttribute('height', '100%');
-          svgEl.style.width = '100%';
-          svgEl.style.height = '100%';
+          // Remove all scaling attributes/styles Mermaid injects
+          svgEl.removeAttribute('width');
+          svgEl.removeAttribute('height');
+          svgEl.removeAttribute('style');
+          const viewBox = svgEl.viewBox?.baseVal;
+          if (viewBox) {
+            svgRefWidth = viewBox.width;
+            svgRefHeight = viewBox.height;
+          }
         }
-  preview.style.width = '100%';
-  preview.style.height = '100%';
-  preview.style.maxWidth = '';
-  preview.style.maxHeight = '';
-  preview.style.display = '';
-  preview.style.overflow = 'hidden';
-      }
-      applyTransform();
-      updateZoomRatio();
-    });
+        if (svgWrap) {
+          svgWrap.style.width = '100%';
+          svgWrap.style.height = '100%';
+          svgWrap.style.maxWidth = '100%';
+          svgWrap.style.maxHeight = '100%';
+          svgWrap.style.overflow = 'visible';
+          svgWrap.style.display = 'flex';
+          svgWrap.style.alignItems = 'center';
+          svgWrap.style.justifyContent = 'center';
+          if (svgEl) {
+            svgEl.removeAttribute('width');
+            svgEl.removeAttribute('height');
+            svgEl.style.width = 'auto';
+            svgEl.style.height = 'auto';
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.maxHeight = '100%';
+          }
+        }
+        applyTransform();
+        updateZoomRatio();
+      });
     }
     errorMessage.textContent = errorMsg || '';
+  }
+
   // Mouse wheel for zoom
   preview.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  const rect = preview.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-  const prevScale = scale;
-  const delta = Math.sign(e.deltaY);
-  scale *= delta > 0 ? 0.9 : 1.1;
-  scale = Math.max(0.2, Math.min(scale, 5));
-  // Adjust pan so zoom is centered on mouse
-  panX = mouseX - ((mouseX - panX) * (scale / prevScale));
-  panY = mouseY - ((mouseY - panY) * (scale / prevScale));
-  applyTransform();
+    e.preventDefault();
+    const rect = preview.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const prevScale = scale;
+    const delta = Math.sign(e.deltaY);
+    scale *= delta > 0 ? 0.9 : 1.1;
+    scale = Math.max(0.2, Math.min(scale, 5));
+    // Adjust pan so zoom is centered on mouse
+    panX = mouseX - ((mouseX - panX) * (scale / prevScale));
+    panY = mouseY - ((mouseY - panY) * (scale / prevScale));
+    applyTransform();
   });
 
   // Mouse drag for pan
@@ -180,15 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
     dragStart = {x: e.clientX - panX, y: e.clientY - panY};
     preview.style.cursor = 'grab';
   });
+
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     panX = e.clientX - dragStart.x;
     panY = e.clientY - dragStart.y;
     applyTransform();
   });
+
   window.addEventListener('mouseup', () => {
-  isDragging = false;
-  preview.style.cursor = 'zoom-in';
+    isDragging = false;
+    preview.style.cursor = 'zoom-in';
   });
 
   // Touch support for pan
@@ -198,17 +203,18 @@ document.addEventListener('DOMContentLoaded', () => {
     dragStart = {x: e.touches[0].clientX - panX, y: e.touches[0].clientY - panY};
     preview.style.cursor = 'grab';
   });
+
   window.addEventListener('touchmove', (e) => {
     if (!isDragging || e.touches.length !== 1) return;
     panX = e.touches[0].clientX - dragStart.x;
     panY = e.touches[0].clientY - dragStart.y;
     applyTransform();
   });
+
   window.addEventListener('touchend', () => {
-  isDragging = false;
-  preview.style.cursor = 'zoom-in';
+    isDragging = false;
+    preview.style.cursor = 'zoom-in';
   });
-  }
 
   // Initial render
   renderMermaid(editor.value);
@@ -222,28 +228,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Export SVG
   document.getElementById('exportSVG').addEventListener('click', () => {
-  const svgEl = preview.querySelector('svg');
-  if (!svgEl) return;
-  // Remove whitespace around SVG
-  const svgClone = svgEl.cloneNode(true);
-  svgClone.removeAttribute('width');
-  svgClone.removeAttribute('height');
-  svgClone.setAttribute('width', svgEl.viewBox.baseVal.width);
-  svgClone.setAttribute('height', svgEl.viewBox.baseVal.height);
-  const blob = new Blob([new XMLSerializer().serializeToString(svgClone)], {type: 'image/svg+xml'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'diagram.svg';
-  a.click();
-  URL.revokeObjectURL(url);
+    const svgEl = preview.querySelector('svg');
+    if (!svgEl) return;
+    const svgClone = svgEl.cloneNode(true);
+    svgClone.removeAttribute('width');
+    svgClone.removeAttribute('height');
+    svgClone.setAttribute('width', svgEl.viewBox.baseVal.width);
+    svgClone.setAttribute('height', svgEl.viewBox.baseVal.height);
+    const blob = new Blob([new XMLSerializer().serializeToString(svgClone)], {type: 'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'diagram.svg';
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
   // Export PNG
   document.getElementById('exportPNG').addEventListener('click', () => {
     const svgEl = preview.querySelector('svg');
     if (!svgEl) return;
-    // Use viewBox for tight cropping
     const viewBox = svgEl.viewBox.baseVal;
     const svgClone = svgEl.cloneNode(true);
     svgClone.removeAttribute('width');

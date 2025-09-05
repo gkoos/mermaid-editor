@@ -1,6 +1,6 @@
 # Mermaid Editor
 
-A fast, modern, browser-based editor for creating and exporting Mermaid diagrams. Built with Vite, Tailwind CSS, and Mermaid.js.
+A fast, browser-based editor for creating and exporting Mermaid diagrams. Built with Vite, Tailwind CSS, and Mermaid.js.
 
 ## Features
 - Live Mermaid diagram preview

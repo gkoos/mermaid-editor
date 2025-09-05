@@ -9,27 +9,27 @@
   <script data-goatcounter="https://mermaid-editor.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 </head>
-<body class="p-6 font-sans">
-  <h1 class="text-xl font-bold mb-4 text-center">Mermaid Editor</h1>
-  <div class="flex flex-col md:flex-row w-full max-w-6xl mx-auto gap-4">
-    <div class="flex flex-row gap-4 w-full">
-      <div class="flex flex-col flex-1">
-        <div class="flex flex-row items-center mb-2" style="height:48px;">
+<body class="font-sans h-screen overflow-hidden flex flex-col p-6">
+  <h1 class="text-xl font-bold mb-4 text-center flex-shrink-0">Mermaid Editor</h1>
+  <div class="flex flex-col md:flex-row w-full max-w-6xl mx-auto gap-4 flex-1 min-h-0">
+    <div class="flex flex-row gap-4 w-full h-full min-h-0">
+      <div class="flex flex-col flex-1 h-full min-h-0">
+        <div class="flex flex-row items-center mb-2 flex-shrink-0" style="height:48px;">
           <label for="editor" class="font-semibold">Code Editor</label>
         </div>
-        <div class="flex flex-row w-full">
-          <div id="line-numbers" class="text-right pr-2 pt-4 select-none text-gray-400 bg-gray-50 border-l border-t border-b rounded-l-lg" style="min-width:2.5em;"></div>
-          <textarea id="editor" class="flex-1 h-full min-h-[300px] md:min-h-[600px] font-mono border rounded-r-lg p-4 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <div class="flex flex-row w-full flex-1 min-h-0">
+          <div id="line-numbers" class="text-right pr-2 pt-4 select-none text-gray-400 bg-gray-50 border-l border-t border-b rounded-l-lg flex-shrink-0" style="min-width:2.5em;"></div>
+          <textarea id="editor" class="flex-1 h-full font-mono border rounded-r-lg p-4 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-0">
 graph TD;
     A-->B;
     B-->C;
     C-->A;
           </textarea>
         </div>
-        <div id="error-message" class="mt-2 min-h-[64px] max-h-40 overflow-auto break-words text-red-500 text-sm"></div>
+        <div id="error-message" class="mt-2 min-h-[64px] max-h-40 overflow-auto break-words text-red-500 text-sm flex-shrink-0"></div>
       </div>
-      <div class="flex flex-col flex-1">
-        <div class="flex flex-row items-center mb-2 justify-between" style="height:48px;">
+      <div class="flex flex-col flex-1 h-full min-h-0">
+        <div class="flex flex-row items-center mb-2 justify-between flex-shrink-0" style="height:48px;">
           <label class="font-semibold">Diagram Preview</label>
           <span id="zoom-ratio" class="text-xs text-gray-500 ml-2">Zoom: 100%</span>
           <div class="flex gap-2">
@@ -37,10 +37,21 @@ graph TD;
             <button id="exportPNG" class="bg-green-500 text-white px-4 py-2 rounded">Export PNG</button>
           </div>
         </div>
-  <div id="preview" class="border rounded-lg bg-white dark:bg-gray-900" style="display: inline-block; overflow: hidden; box-sizing: border-box;"></div>
-      </div>
+        <div id="preview" class="border rounded-lg bg-white dark:bg-gray-900 flex-1 w-full overflow-hidden flex items-center justify-center min-h-0"></div>
       </div>
     </div>
   </div>
+  <footer class="mt-4 pt-4 border-t text-center text-gray-600 text-sm flex-shrink-0">
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <a href="https://github.com/gkoos/mermaid-editor" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">
+        View on GitHub
+      </a>
+      <span class="text-gray-400">•</span>
+      <a href="https://www.buymeacoffee.com/gkoos" target="_blank" rel="noopener noreferrer" class="text-yellow-600 hover:text-yellow-700 underline flex items-center gap-1">
+        <span>☕</span>
+        <span>Buy me a coffee</span>
+      </a>
+    </div>
+  </footer>
 </body>
 </html>
